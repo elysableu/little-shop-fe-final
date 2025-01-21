@@ -236,7 +236,7 @@ function getMerchantCoupons(event) {
   let merchantId = event.target.closest("article").id.split('-')[1]
   console.log("Merchant ID:", merchantId)
 
-  fetchData(`merchants/${merchantId}`)
+  fetchData(`merchants/${merchantId}/coupons`)
   .then(couponData => {
     console.log("Coupon data from fetch:", couponData)
     displayMerchantCoupons(couponData);
@@ -244,12 +244,25 @@ function getMerchantCoupons(event) {
 }
 
 function displayMerchantCoupons(coupons) {
+  let merchant = findMerchant(coupons.data[0].attributes.merchant_id)
+  console.log("This merchants coupons: ", coupons)
+  showingText.innerText = `All Coupons For Merchant #${merchant.id}`
   show([couponsView])
-  hide([merchantsView, itemsView])
-
-  couponsView.innerHTML = `
-    <p>Coupon data will go here.</p>
-  `
+  hide([merchantsView, itemsView, addNewButton, merchantForm])
+  couponsView.innerHTML = ""
+  coupons.data.forEach(coupon => {
+    console.log(coupon)
+    couponsView.innerHTML += `
+      <article class="coupon" id="coupon-${coupon.id}">
+            <img src="" alt="">
+            <h2>${coupon.attributes.name}</h2>
+            <p>${coupon.attributes.code}</p>
+            <p>${Math.round(coupon.attributes.percent_discount * 100)}% OFF</p>
+            <p>${activeStatusDisplay(coupon.attributes.active)}</p>
+            <p class="merchant-name-in-coupon">Merchant: ${merchant.attributes.name}</p>
+          </article>
+      `
+  })
 }
 
 //Helper Functions
@@ -291,4 +304,8 @@ function findMerchant(id) {
       return foundMerchant
     }
   }
+}
+
+function activeStatusDisplay(status) {
+  return status ? "active" : "inactive"
 }
